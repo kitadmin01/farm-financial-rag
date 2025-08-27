@@ -9,6 +9,8 @@ import logging
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from farm_rag_app import FarmDataRAG
@@ -35,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 # Initialize RAG application
 try:
@@ -72,8 +77,17 @@ async def root():
         "message": "Farm Financial Data RAG API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "web_interface": "/web_interface.html"
     }
+
+@app.get("/web_interface.html")
+async def web_interface():
+    """Serve the web interface HTML file."""
+    try:
+        return FileResponse("web_interface.html", media_type="text/html")
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Web interface not found")
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
