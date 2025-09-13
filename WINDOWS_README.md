@@ -22,8 +22,8 @@ AI-powered farm financial data analysis. Ask questions in plain English and get 
 1. **Install Python & Git** (see Prerequisites above)
 2. **Clone the repository**:
    ```cmd
-   git clone https://github.com/yourusername/ilm_uni.git
-   cd ilm_uni
+   git clone https://github.com/kitadmin01/farm-financial-rag
+   cd farm-financial-rag
    ```
 3. **Double-click `user_setup.bat`**
 4. **Follow the prompts** - everything else is automated!
@@ -39,12 +39,12 @@ AI-powered farm financial data analysis. Ask questions in plain English and get 
 ### **After Setup (Daily Usage)**
 
 **To start the application:**
-1. **Navigate to project folder**: `cd ilm_uni`
+1. **Navigate to project folder**: `cd farm-financial-rag`
 2. **Double-click `user_setup.bat`** (or run manually below)
 
 **Manual start:**
 ```cmd
-cd ilm_uni
+cd farm-financial-rag
 venv\Scripts\activate
 cd src
 python farm_rag_api.py
@@ -95,7 +95,7 @@ Then open: http://localhost:8000/web_interface.html
 ## 📁 Project Structure
 
 ```
-ilm_uni/
+farm-financial-rag/
 ├── user_setup.bat              # 🚀 Main setup file
 ├── requirements.txt            # Python dependencies
 ├── src/
