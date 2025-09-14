@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-Script to create the SQLite database schema and insert data from CSV files.
+Script to create the SQLite database schema and insert sample data.
 This is the essential script for first-time database setup.
+Uses the same approach as add_sample_data_minimal.py for reliable data creation.
 """
 
 import sqlite3
-import pandas as pd
 import os
-from pathlib import Path
 
 def create_database_schema(cursor):
     """Create all database tables with proper schemas."""
@@ -273,61 +272,14 @@ def create_database_schema(cursor):
     
     print("✅ All tables created successfully!")
 
-def insert_csv_data(cursor, csv_dir):
-    """Insert data from CSV files into the database."""
+def insert_sample_data_direct(cursor):
+    """Insert sample data directly into the database (same approach as add_sample_data_minimal.py)."""
     
-    csv_files = {
-        'hdb_main_data': 'HdbMainData_sample.csv',
-        'fm_genin': 'FM_Genin_sample.csv',
-        'fm_guide': 'Fm_Guide_sample.csv',
-        'fm_stmts': 'Fm_Stmts_sample.csv'
-    }
+    print("📊 Adding sample data directly to database...")
+    print("=" * 50)
     
-    csv_data_found = False
-    
-    for table_name, csv_file in csv_files.items():
-        csv_path = os.path.join(csv_dir, csv_file)
-        if os.path.exists(csv_path):
-            try:
-                print(f"Inserting data from {csv_file} into {table_name}...")
-                df = pd.read_csv(csv_path)
-                
-                # Handle different CSV structures
-                if table_name == 'hdb_main_data':
-                    # Skip the first column if it's an index
-                    if df.columns[0] == 'Unnamed: 0':
-                        df = df.iloc[:, 1:]
-                    
-                    # Insert data
-                    for _, row in df.iterrows():
-                        placeholders = ', '.join(['?' for _ in row])
-                        columns = ', '.join(row.index)
-                        cursor.execute(f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})", tuple(row))
-                
-                elif table_name in ['fm_genin', 'fm_guide', 'fm_stmts']:
-                    # For other tables, insert all columns
-                    for _, row in df.iterrows():
-                        placeholders = ', '.join(['?' for _ in row])
-                        columns = ', '.join(row.index)
-                        cursor.execute(f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})", tuple(row))
-                
-                print(f"✅ Inserted {len(df)} rows into {table_name}")
-                csv_data_found = True
-                
-            except Exception as e:
-                print(f"❌ Error inserting data into {table_name}: {e}")
-        else:
-            print(f"⚠️  CSV file not found: {csv_file}")
-    
-    # If no CSV data was found, use sample data instead
-    if not csv_data_found:
-        print("\n📊 No CSV files found, using sample data instead...")
-        insert_sample_data(cursor)
-
-def insert_sample_data(cursor):
-    """Insert sample data when CSV files are not available."""
-    
-    print("Adding sample data to hdb_main_data...")
+    # Add sample data to hdb_main_data (22 columns - confirmed working)
+    print("Adding data to hdb_main_data...")
     cursor.execute("""
         INSERT INTO hdb_main_data (
             hdb_main_data_id, file_id, tenant_id, organization_id, 
@@ -354,7 +306,8 @@ def insert_sample_data(cursor):
     """)
     print("✅ Added 3 farms to hdb_main_data")
     
-    print("Adding sample data to fm_genin...")
+    # Add sample data to fm_genin (3 columns - confirmed working)
+    print("Adding data to fm_genin...")
     cursor.execute("""
         INSERT INTO fm_genin (
             fm_genin_guid, hdb_main_data_id, item_name
@@ -365,7 +318,8 @@ def insert_sample_data(cursor):
     """)
     print("✅ Added 3 records to fm_genin")
     
-    print("Adding sample data to fm_guide...")
+    # Add sample data to fm_guide with key performance metrics (simplified approach)
+    print("Adding data to fm_guide...")
     cursor.execute("""
         INSERT INTO fm_guide (
             item_name, fm_genin_guid, hdb_main_data_id, current_ratio_beg, current_ratio_end,
@@ -383,9 +337,10 @@ def insert_sample_data(cursor):
         ('Prairie Wheat Farm', 'guid_003', 'farm_003', 2.4, 2.7, 520000.00, 600000.00, 275000.00, 275000.00,
          325000.00, 325000.00, 'Strong', 0.88, 3.0, 0.13, 0.62, 0.581, 0.081, 0.419, 0.32, 0.29, 0.26, 0.24)
     """)
-    print("✅ Added 3 records to fm_guide")
+    print("✅ Added 3 records to fm_guide with key performance metrics")
     
-    print("Adding sample data to fm_stmts...")
+    # Add sample data to fm_stmts with financial data
+    print("Adding data to fm_stmts...")
     cursor.execute("""
         INSERT INTO fm_stmts (
             item_name, fm_genin_guid, hdb_main_data_id, beginning_net_worth, net_farm_income, 
@@ -406,30 +361,90 @@ def insert_sample_data(cursor):
          'Positive', 0.00, 0.00, 'Stable', 55000.00, -12000.00, 195000.00, 218000.00, 2018000.00, 
          2018000.00, 0.00, 95000.00, 620000.00, 345000.00, 15000.00, 292000.00)
     """)
-    print("✅ Added 3 records to fm_stmts")
+    print("✅ Added 3 records to fm_stmts with financial data")
     
-    # Add sample data to other tables
-    tables_to_populate = [
-        ('fm_prf_lq', 'Profitability & Liquidity Analysis'),
-        ('fm_cap_ad', 'Capital & Asset Analysis'),
-        ('fm_hhold', 'Household Financial Analysis'),
-        ('fm_nf_ie', 'Non-Farm Income & Expenses'),
-        ('fm_fm_exp', 'Farm Expenses Analysis'),
-        ('fm_fm_inc', 'Farm Income Analysis'),
-        ('fm_beg_bs_end_bs', 'Balance Sheet Analysis')
-    ]
+    # Add sample data to other tables with financial metrics
+    print("Adding data to fm_prf_lq (Profitability & Liquidity)...")
+    cursor.execute("""
+        INSERT INTO fm_prf_lq (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Current Ratio Analysis', 'guid_001', 'farm_001'),
+        ('Working Capital Analysis', 'guid_002', 'farm_002'),
+        ('Debt-to-Asset Analysis', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_prf_lq")
     
-    for table_name, description in tables_to_populate:
-        print(f"Adding sample data to {table_name}...")
-        cursor.execute(f"""
-            INSERT INTO {table_name} (
-                item_name, fm_genin_guid, hdb_main_data_id
-            ) VALUES 
-            ('{description} - Farm 1', 'guid_001', 'farm_001'),
-            ('{description} - Farm 2', 'guid_002', 'farm_002'),
-            ('{description} - Farm 3', 'guid_003', 'farm_003')
-        """)
-        print(f"✅ Added 3 records to {table_name}")
+    print("Adding data to fm_cap_ad (Capital & Assets)...")
+    cursor.execute("""
+        INSERT INTO fm_cap_ad (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Asset Valuation', 'guid_001', 'farm_001'),
+        ('Capital Structure', 'guid_002', 'farm_002'),
+        ('Investment Analysis', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_cap_ad")
+    
+    print("Adding data to fm_hhold (Household)...")
+    cursor.execute("""
+        INSERT INTO fm_hhold (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Family Living Expenses', 'guid_001', 'farm_001'),
+        ('Household Income', 'guid_002', 'farm_002'),
+        ('Personal Financial Planning', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_hhold")
+    
+    print("Adding data to fm_nf_ie (Non-Farm Income & Expenses)...")
+    cursor.execute("""
+        INSERT INTO fm_nf_ie (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Off-Farm Employment', 'guid_001', 'farm_001'),
+        ('Investment Income', 'guid_002', 'farm_002'),
+        ('Rental Income', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_nf_ie")
+    
+    print("Adding data to fm_fm_exp (Farm Expenses)...")
+    cursor.execute("""
+        INSERT INTO fm_fm_exp (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Feed Costs', 'guid_001', 'farm_001'),
+        ('Seed Costs', 'guid_002', 'farm_002'),
+        ('Fertilizer Costs', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_fm_exp")
+    
+    print("Adding data to fm_fm_inc (Farm Income)...")
+    cursor.execute("""
+        INSERT INTO fm_fm_inc (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Crop Sales', 'guid_001', 'farm_001'),
+        ('Livestock Sales', 'guid_002', 'farm_002'),
+        ('Dairy Sales', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_fm_inc")
+    
+    print("Adding data to fm_beg_bs_end_bs (Balance Sheet)...")
+    cursor.execute("""
+        INSERT INTO fm_beg_bs_end_bs (
+            item_name, fm_genin_guid, hdb_main_data_id
+        ) VALUES 
+        ('Beginning Assets', 'guid_001', 'farm_001'),
+        ('Ending Assets', 'guid_002', 'farm_002'),
+        ('Beginning Liabilities', 'guid_003', 'farm_003')
+    """)
+    print("✅ Added 3 records to fm_beg_bs_end_bs")
+    
+    print("\n" + "=" * 50)
+    print("🎉 Sample data added successfully!")
+    print("Database now contains sample farm data for testing.")
+
 
 def main():
     """Main function to create database and insert data."""
@@ -439,9 +454,6 @@ def main():
     
     # Database file path
     db_path = "finbin_farm_data.db"
-    
-    # CSV directory path (relative to src directory)
-    csv_dir = "../data/samples_v2"
     
     # Remove existing database if it exists
     if os.path.exists(db_path):
@@ -456,8 +468,8 @@ def main():
         print("📊 Creating database schema...")
         create_database_schema(cursor)
         
-        print("\n📊 Inserting CSV data...")
-        insert_csv_data(cursor, csv_dir)
+        print("\n📊 Inserting sample data...")
+        insert_sample_data_direct(cursor)
         
         # Commit changes and close connection
         conn.commit()
@@ -466,7 +478,6 @@ def main():
         print("\n" + "=" * 50)
         print("🎉 Database created successfully!")
         print(f"📁 Database file: {db_path}")
-        print(f"📊 CSV data directory: {csv_dir}")
         
         # Check the created database
         print("\n📊 Checking database contents...")
@@ -509,7 +520,7 @@ def check_database_contents(db_path):
         if total_rows > 0:
             print("✅ Database has data!")
         else:
-            print("❌ Database is empty - CSV files may not have been found")
+            print("❌ Database is empty - sample data insertion may have failed")
         
         conn.close()
         
