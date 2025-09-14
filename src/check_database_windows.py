@@ -44,8 +44,8 @@ def check_database():
         print(f"[INFO] Total rows across all tables: {total_rows}")
         
         # Check if data exists
-        if total_rows == 0:
-            print("\n[WARNING] All tables are empty!")
+        if total_rows == 0 or len(tables) == 0:
+            print("\n[WARNING] Database is empty or has no tables!")
             print("   The database creation script may not have completed successfully.")
             print("   Run: python create_database.py")
             return False

@@ -84,10 +84,10 @@ cd /d "src"
 REM Check if database exists and has data
 if not exist "finbin_farm_data.db" (
     echo [SETUP] Creating database with sample data...
-    python create_db_windows.py
+    python create_simple_db.py
     if %errorLevel% neq 0 (
         echo [WARN] Standard python failed, trying python.exe...
-        python.exe create_db_windows.py
+        python.exe create_simple_db.py
         if %errorLevel% neq 0 (
             echo [ERROR] Failed to create database with both python and python.exe.
             echo Please ensure Python is installed and accessible.
@@ -103,10 +103,10 @@ if not exist "finbin_farm_data.db" (
         echo [WARN] Database exists but is empty or corrupted, recreating...
         del finbin_farm_data.db
         echo [SETUP] Creating database with sample data...
-        python create_db_windows.py
+        python create_simple_db.py
         if %errorLevel% neq 0 (
             echo [WARN] Standard python failed, trying python.exe...
-            python.exe create_db_windows.py
+            python.exe create_simple_db.py
             if %errorLevel% neq 0 (
                 echo [ERROR] Failed to create database with both python and python.exe.
                 echo Please ensure Python is installed and accessible.
