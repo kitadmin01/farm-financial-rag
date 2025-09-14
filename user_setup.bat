@@ -81,13 +81,13 @@ if not exist ".env" (
 REM Navigate to src directory
 cd /d "src"
 
-REM Check if database exists
+REM Check if database exists and has data
 if not exist "finbin_farm_data.db" (
     echo [SETUP] Creating database with sample data...
-    python create_database.py
+    python create_db_windows.py
     if %errorLevel% neq 0 (
         echo [WARN] Standard python failed, trying python3...
-        python3 create_database.py
+        python3 create_db_windows.py
         if %errorLevel% neq 0 (
             echo [ERROR] Failed to create database with both python and python3.
             echo Please ensure Python is installed and accessible.
@@ -97,7 +97,27 @@ if not exist "finbin_farm_data.db" (
     )
     echo [OK] Database created successfully
 ) else (
-    echo [OK] Database already exists
+    echo [CHECK] Database exists, checking if it has data...
+    python check_database.py | findstr "Total rows across all tables: 0" >nul
+    if %errorLevel% equ 0 (
+        echo [WARN] Database exists but is empty, recreating...
+        del finbin_farm_data.db
+        echo [SETUP] Creating database with sample data...
+        python create_db_windows.py
+        if %errorLevel% neq 0 (
+            echo [WARN] Standard python failed, trying python3...
+            python3 create_db_windows.py
+            if %errorLevel% neq 0 (
+                echo [ERROR] Failed to create database with both python and python3.
+                echo Please ensure Python is installed and accessible.
+                pause
+                exit /b 1
+            )
+        )
+        echo [OK] Database recreated successfully
+    ) else (
+        echo [OK] Database exists and has data
+    )
 )
 
 REM Verify database has data
