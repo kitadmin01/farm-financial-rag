@@ -283,6 +283,8 @@ def insert_csv_data(cursor, csv_dir):
         'fm_stmts': 'Fm_Stmts_sample.csv'
     }
     
+    csv_data_found = False
+    
     for table_name, csv_file in csv_files.items():
         csv_path = os.path.join(csv_dir, csv_file)
         if os.path.exists(csv_path):
@@ -310,11 +312,124 @@ def insert_csv_data(cursor, csv_dir):
                         cursor.execute(f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})", tuple(row))
                 
                 print(f"✅ Inserted {len(df)} rows into {table_name}")
+                csv_data_found = True
                 
             except Exception as e:
                 print(f"❌ Error inserting data into {table_name}: {e}")
         else:
             print(f"⚠️  CSV file not found: {csv_file}")
+    
+    # If no CSV data was found, use sample data instead
+    if not csv_data_found:
+        print("\n📊 No CSV files found, using sample data instead...")
+        insert_sample_data(cursor)
+
+def insert_sample_data(cursor):
+    """Insert sample data when CSV files are not available."""
+    
+    print("Adding sample data to hdb_main_data...")
+    cursor.execute("""
+        INSERT INTO hdb_main_data (
+            hdb_main_data_id, file_id, tenant_id, organization_id, 
+            branch_id, branch_state, primary_banker_user_id, primary_banker_name, 
+            analyst_name, fbm_farm_id, finbin_id, finbin_id_year, dataset, 
+            fp_source_id, fp_source_date_modified, analysis_type, year, 
+            state, county, client_first_last_name, client_addr_city_state, delete_data
+        ) VALUES 
+        ('farm_001', 'file_001', 'tenant_001', 'org_001', 
+         'branch_001', 'MN', 'banker_001', 'John Smith', 'Analyst A', 
+         'farm_001', 'finbin_001', '2021', 'dataset_001', 'source_001', 
+         '2023-01-15', 'analysis_001', '2021', 'MN', 'Hennepin', 
+         'Johnson Dairy Farm', 'Minneapolis, MN', 'N'),
+        ('farm_002', 'file_002', 'tenant_002', 'org_002', 
+         'branch_002', 'WI', 'banker_002', 'Jane Doe', 'Analyst B', 
+         'farm_002', 'finbin_002', '2021', 'dataset_002', 'source_002', 
+         '2023-02-20', 'analysis_002', '2021', 'WI', 'Dane', 
+         'Green Valley Corn Farm', 'Madison, WI', 'N'),
+        ('farm_003', 'file_003', 'tenant_003', 'org_003', 
+         'branch_003', 'ND', 'banker_003', 'Bob Johnson', 'Analyst C', 
+         'farm_003', 'finbin_003', '2021', 'dataset_003', 'source_003', 
+         '2023-03-10', 'analysis_003', '2021', 'ND', 'Cass', 
+         'Prairie Wheat Farm', 'Fargo, ND', 'N')
+    """)
+    print("✅ Added 3 farms to hdb_main_data")
+    
+    print("Adding sample data to fm_genin...")
+    cursor.execute("""
+        INSERT INTO fm_genin (
+            fm_genin_guid, hdb_main_data_id, item_name
+        ) VALUES 
+        ('guid_001', 'farm_001', 'Johnson Dairy Farm'),
+        ('guid_002', 'farm_002', 'Green Valley Corn Farm'),
+        ('guid_003', 'farm_003', 'Prairie Wheat Farm')
+    """)
+    print("✅ Added 3 records to fm_genin")
+    
+    print("Adding sample data to fm_guide...")
+    cursor.execute("""
+        INSERT INTO fm_guide (
+            item_name, fm_genin_guid, hdb_main_data_id, current_ratio_beg, current_ratio_end,
+            working_capital_beg, working_capital_end, net_farm_income_cost, net_farm_income_mkt,
+            ebitda_cost, ebitda_mkt, capital_repayment_capacity, capital_repayment_margin,
+            term_debt_coverage_ratio_accr, replacement_margin, asset_turnover_rate_cost,
+            operating_expense_ratio, interest_expense_ratio, net_farm_income_ratio,
+            beg_cost_farm_debt_to_asset_ratio, end_cost_farm_debt_to_asset_ratio,
+            beg_mkt_farm_debt_to_asset_ratio, end_mkt_farm_debt_to_asset_ratio
+        ) VALUES 
+        ('Johnson Dairy Farm', 'guid_001', 'farm_001', 2.1, 2.3, 450000.00, 520000.00, 185000.00, 185000.00,
+         225000.00, 225000.00, 'Strong', 0.85, 2.8, 0.12, 0.6, 0.589, 0.089, 0.411, 0.35, 0.32, 0.28, 0.26),
+        ('Green Valley Corn Farm', 'guid_002', 'farm_002', 2.8, 3.1, 680000.00, 780000.00, 320000.00, 320000.00,
+         380000.00, 380000.00, 'Strong', 0.92, 3.2, 0.15, 0.65, 0.577, 0.077, 0.423, 0.28, 0.25, 0.22, 0.19),
+        ('Prairie Wheat Farm', 'guid_003', 'farm_003', 2.4, 2.7, 520000.00, 600000.00, 275000.00, 275000.00,
+         325000.00, 325000.00, 'Strong', 0.88, 3.0, 0.13, 0.62, 0.581, 0.081, 0.419, 0.32, 0.29, 0.26, 0.24)
+    """)
+    print("✅ Added 3 records to fm_guide")
+    
+    print("Adding sample data to fm_stmts...")
+    cursor.execute("""
+        INSERT INTO fm_stmts (
+            item_name, fm_genin_guid, hdb_main_data_id, beginning_net_worth, net_farm_income, 
+            change_in_nonfarm_assets, change_in_nonfarm_accts_payable, other_cash_flows,
+            total_change_in_retained_earnings, debts_forgiven, capital_loss_on_repossessions,
+            total_change_in_contributed_cap, change_in_mkt_value_of_cap_assets, change_in_deferred_liabilities,
+            total_change_in_market_value, total_change_in_net_worth, ending_net_worth_calculated,
+            ending_net_worth_reported, equity_discrepancy, beg_cash_balance_farm_and_nonfarm,
+            gross_cash_farm_income, total_cash_farm_expense, net_cash_from_hedging, cash_from_operations
+        ) VALUES 
+        ('Johnson Dairy Farm', 'guid_001', 'farm_001', 1250000.00, 185000.00, 25000.00, -5000.00, 15000.00, 
+         'Positive', 0.00, 0.00, 'Stable', 45000.00, -10000.00, 135000.00, 160000.00, 1410000.00, 
+         1410000.00, 0.00, 75000.00, 450000.00, 265000.00, 12000.00, 197000.00),
+        ('Green Valley Corn Farm', 'guid_002', 'farm_002', 2100000.00, 320000.00, 40000.00, -8000.00, 22000.00, 
+         'Positive', 0.00, 0.00, 'Stable', 65000.00, -15000.00, 225000.00, 247000.00, 2347000.00, 
+         2347000.00, 0.00, 120000.00, 780000.00, 460000.00, 18000.00, 338000.00),
+        ('Prairie Wheat Farm', 'guid_003', 'farm_003', 1800000.00, 275000.00, 35000.00, -6000.00, 18000.00, 
+         'Positive', 0.00, 0.00, 'Stable', 55000.00, -12000.00, 195000.00, 218000.00, 2018000.00, 
+         2018000.00, 0.00, 95000.00, 620000.00, 345000.00, 15000.00, 292000.00)
+    """)
+    print("✅ Added 3 records to fm_stmts")
+    
+    # Add sample data to other tables
+    tables_to_populate = [
+        ('fm_prf_lq', 'Profitability & Liquidity Analysis'),
+        ('fm_cap_ad', 'Capital & Asset Analysis'),
+        ('fm_hhold', 'Household Financial Analysis'),
+        ('fm_nf_ie', 'Non-Farm Income & Expenses'),
+        ('fm_fm_exp', 'Farm Expenses Analysis'),
+        ('fm_fm_inc', 'Farm Income Analysis'),
+        ('fm_beg_bs_end_bs', 'Balance Sheet Analysis')
+    ]
+    
+    for table_name, description in tables_to_populate:
+        print(f"Adding sample data to {table_name}...")
+        cursor.execute(f"""
+            INSERT INTO {table_name} (
+                item_name, fm_genin_guid, hdb_main_data_id
+            ) VALUES 
+            ('{description} - Farm 1', 'guid_001', 'farm_001'),
+            ('{description} - Farm 2', 'guid_002', 'farm_002'),
+            ('{description} - Farm 3', 'guid_003', 'farm_003')
+        """)
+        print(f"✅ Added 3 records to {table_name}")
 
 def main():
     """Main function to create database and insert data."""
