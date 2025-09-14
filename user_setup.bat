@@ -98,8 +98,8 @@ if not exist "finbin_farm_data.db" (
     echo [OK] Database created successfully
 ) else (
     echo [CHECK] Database exists, checking if it has data...
-    python check_database.py | findstr "Total rows across all tables: 0" >nul
-    if %errorLevel% equ 0 (
+    python check_database_windows.py
+    if %errorLevel% neq 0 (
         echo [WARN] Database exists but is empty, recreating...
         del finbin_farm_data.db
         echo [SETUP] Creating database with sample data...
@@ -122,10 +122,10 @@ if not exist "finbin_farm_data.db" (
 
 REM Verify database has data
 echo [CHECK] Verifying database contents...
-python check_database.py
+python check_database_windows.py
 if %errorLevel% neq 0 (
     echo [WARN] Standard python failed for verification, trying python3...
-    python3 check_database.py
+    python3 check_database_windows.py
     if %errorLevel% neq 0 (
         echo [ERROR] Database verification failed with both python and python3.
         pause
