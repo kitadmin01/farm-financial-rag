@@ -278,6 +278,8 @@ def insert_sample_data_direct(cursor):
     print("📊 Adding sample data directly to database...")
     print("=" * 50)
     
+    try:
+    
     # Add sample data to hdb_main_data (22 columns - confirmed working)
     print("Adding data to hdb_main_data...")
     cursor.execute("""
@@ -444,6 +446,12 @@ def insert_sample_data_direct(cursor):
     print("\n" + "=" * 50)
     print("🎉 Sample data added successfully!")
     print("Database now contains sample farm data for testing.")
+    
+    except Exception as e:
+        print(f"\n❌ Error inserting sample data: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 def main():

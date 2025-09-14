@@ -86,9 +86,14 @@ if not exist "finbin_farm_data.db" (
     echo [SETUP] Creating database with sample data...
     python create_database.py
     if %errorLevel% neq 0 (
-        echo [ERROR] Failed to create database.
-        pause
-        exit /b 1
+        echo [WARN] Standard python failed, trying python3...
+        python3 create_database.py
+        if %errorLevel% neq 0 (
+            echo [ERROR] Failed to create database with both python and python3.
+            echo Please ensure Python is installed and accessible.
+            pause
+            exit /b 1
+        )
     )
     echo [OK] Database created successfully
 ) else (
@@ -99,9 +104,13 @@ REM Verify database has data
 echo [CHECK] Verifying database contents...
 python check_database.py
 if %errorLevel% neq 0 (
-    echo [ERROR] Database verification failed.
-    pause
-    exit /b 1
+    echo [WARN] Standard python failed for verification, trying python3...
+    python3 check_database.py
+    if %errorLevel% neq 0 (
+        echo [ERROR] Database verification failed with both python and python3.
+        pause
+        exit /b 1
+    )
 )
 
 echo.
@@ -120,6 +129,16 @@ echo.
 
 REM Start the web interface
 python farm_rag_api.py
+if %errorLevel% neq 0 (
+    echo [WARN] Standard python failed for web interface, trying python3...
+    python3 farm_rag_api.py
+    if %errorLevel% neq 0 (
+        echo [ERROR] Failed to start web interface with both python and python3.
+        echo Please ensure Python is installed and accessible.
+        pause
+        exit /b 1
+    )
+)
 
 echo.
 echo [INFO] Web server has stopped
