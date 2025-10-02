@@ -79,7 +79,7 @@ Expected output:
 
 ### **Create Database from Scratch:**
 ```bash
-cd src
+cd srcc
 python3 create_database.py
 ```
 - **Use this**: When setting up for the first time
@@ -101,6 +101,8 @@ python3 check_table_schema.py      # View table structures
 ```
 
 ## 🗄️ Database Schema
+
+![Farm Financial Database ER Diagram](images/farm_er.svg)
 
 The script creates the following tables:
 
@@ -127,6 +129,9 @@ The script creates the following tables:
 
 ## 🏗️ RAG Architecture
 
+![Farm Financial RAG Architecture](images/farm_architecture.svg)
+
+The system follows this workflow:
 ```
 User Question → OpenAI LLM → SQL Generation → SQLite Execution → Data Analysis → AI Response
 ```
